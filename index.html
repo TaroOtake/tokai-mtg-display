@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">会議室 - 予約状況</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- ヘッダー -->
+        <header class="header">
+            <h1 class="room-title" id="roomTitle">会議室</h1>
+            <div class="date" id="currentDate"></div>
+            <div class="time" id="currentTime"></div>
+        </header>
+
+        <!-- 現在の状況 -->
+        <div class="status-card">
+            <div class="status-indicator" id="statusIndicator">
+                <div class="status-dot" id="statusDot"></div>
+                <span class="status-text" id="statusText">利用可能</span>
+            </div>
+        </div>
+
+        <!-- インスタント予約 -->
+        <div class="instant-booking" id="instantBooking">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <span class="icon">➕</span>
+                        インスタント予約
+                    </h2>
+                </div>
+                <div class="card-content">
+                    <div class="booking-buttons" id="bookingButtons">
+                        <!-- JavaScriptで動的生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 今日の予約 -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <span class="icon">📅</span>
+                    今日の予約
+                </h2>
+            </div>
+            <div class="card-content">
+                <div class="meetings-list" id="meetingsList">
+                    <!-- JavaScriptで動的生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- フッター -->
+        <footer class="footer">
+            <div class="last-updated">最終更新: <span id="lastUpdated"></span></div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

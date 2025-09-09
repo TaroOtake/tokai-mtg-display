@@ -1,0 +1,263 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: #f9fafb;
+  min-height: 100vh;
+  padding: 16px;
+}
+
+.container {
+  max-width: 768px;
+  margin: 0 auto;
+}
+
+/* ヘッダー */
+.header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.room-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.date {
+  font-size: 1.125rem;
+  color: #6b7280;
+  margin-bottom: 8px;
+}
+
+.time {
+  font-size: 2.5rem;
+  font-family: "Courier New", monospace;
+  font-weight: bold;
+  color: #2563eb;
+}
+
+/* カード共通スタイル */
+.card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.card-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon {
+  font-size: 1.25rem;
+}
+
+.card-content {
+  padding: 20px;
+}
+
+/* 状況表示 */
+.status-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px 24px;
+  border-radius: 50px;
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+
+.status-indicator.available {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.status-indicator.occupied {
+  background-color: #fecaca;
+  color: #991b1b;
+}
+
+.status-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+.status-dot.available {
+  background-color: #22c55e;
+}
+
+.status-dot.occupied {
+  background-color: #ef4444;
+}
+
+/* インスタント予約 */
+.instant-booking {
+  display: block;
+}
+
+.instant-booking.hidden {
+  display: none;
+}
+
+.booking-buttons {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.booking-btn {
+  height: 64px;
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.booking-btn:hover {
+  background-color: #1d4ed8;
+}
+
+.booking-btn:active {
+  transform: translateY(1px);
+}
+
+.booking-time {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.booking-duration {
+  font-size: 0.75rem;
+  opacity: 0.75;
+}
+
+/* 会議一覧 */
+.meetings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.meeting-item {
+  padding: 16px;
+  border-radius: 8px;
+  border: 2px solid #e5e7eb;
+  background-color: white;
+}
+
+.meeting-item.active {
+  border-color: #fca5a5;
+  background-color: #fef2f2;
+}
+
+.meeting-header {
+  display: flex;
+  justify-content: space-between; /* Changed from 'between' to 'space-between' */
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.meeting-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  flex: 1;
+}
+
+.meeting-badge {
+  background-color: #ef4444;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.meeting-details {
+  display: flex;
+  gap: 16px;
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.meeting-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-family: "Courier New", monospace;
+}
+
+.meeting-organizer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.no-meetings {
+  text-align: center;
+  padding: 32px;
+  color: #6b7280;
+}
+
+/* フッター */
+.footer {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .booking-buttons {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .meeting-details {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .room-title {
+    font-size: 1.75rem;
+  }
+
+  .time {
+    font-size: 2rem;
+  }
+}
