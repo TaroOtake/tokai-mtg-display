@@ -29,6 +29,12 @@ let currentRoomData = { name: "会議室A", meetings: [] }
 let currentTime = new Date()
 let roomStatus = "available" // 'available' or 'occupied'
 
+// 長押し設定
+const LONG_PRESS_DURATION = 1000 // 長押し時間（ミリ秒）
+
+// CSS変数で長押し時間を設定
+document.documentElement.style.setProperty('--long-press-duration', `${LONG_PRESS_DURATION}ms`);
+
 // API設定
 const API_BASE_URL = 'https://room-status-api.taro-otake.workers.dev' // Cloudflare Workersの本番URL
 
@@ -178,9 +184,13 @@ function updateTimeDisplay() {
 // 状況表示を更新
 function updateStatusDisplay() {
   const indicator = document.getElementById("statusIndicator")
-  const dot = document.getElementById("statusDot")
   const text = document.getElementById("statusText")
   const instantBooking = document.getElementById("instantBooking")
+
+  // 長押し中の場合は更新をスキップ
+  if (isLongPressing) {
+    return;
+  }
 
   // 現在の会議室の予約状況を判定
   const now = new Date()
@@ -205,13 +215,16 @@ function updateStatusDisplay() {
 
   if (roomStatus === "available") {
     indicator.className = "status-indicator available"
-    dot.className = "status-dot available"
-    text.textContent = "利用可能"
+    text.innerHTML = `<div class="status-dot available"></div><span class="inline-text">利用可能</span>`
     instantBooking.classList.remove("hidden")
   } else {
     indicator.className = "status-indicator occupied"
-    dot.className = "status-dot occupied"
-    text.textContent = "使用中"
+    text.innerHTML = `
+      <div class="status-main">
+        <div class="status-dot occupied"></div><span class="inline-text">使用中</span>
+      </div>
+      <div class="status-hint">💡長押しで会議終了</div>
+    `
     instantBooking.classList.add("hidden")
   }
 }
@@ -297,6 +310,164 @@ async function handleInstantBooking(endTimeString) {
   await createMeetingViaAPI(newMeeting);
 }
 
+// 通知を表示する関数
+function showNotification(message, isError = false) {
+  const notification = document.getElementById('notification');
+  const notificationText = notification.querySelector('.notification-text');
+  const notificationIcon = notification.querySelector('.notification-icon');
+  
+  notificationText.textContent = message;
+  
+  // エラーの場合はアイコンとスタイルを変更
+  if (isError) {
+    notificationIcon.textContent = '❌';
+    notification.style.backgroundColor = '#ef4444';
+    notification.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.3)';
+  } else {
+    notificationIcon.textContent = '✅';
+    notification.style.backgroundColor = '#10b981';
+    notification.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+  }
+  
+  notification.classList.add('show');
+  
+  // 3秒後に通知を非表示
+  setTimeout(() => {
+    notification.classList.remove('show');
+  }, 3000);
+}
+
+// 現在進行中の会議のIDを取得する関数
+function getCurrentMeetingId() {
+  const now = new Date();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  
+  for (const meeting of currentRoomData.meetings) {
+    const [startH, startM] = meeting.startTime.split(":").map(Number);
+    const [endH, endM] = meeting.endTime.split(":").map(Number);
+    const meetingStartMinutes = startH * 60 + startM;
+    const meetingEndMinutes = endH * 60 + endM;
+    
+    if (currentMinutes >= meetingStartMinutes && currentMinutes < meetingEndMinutes) {
+      return meeting.id; // Graph APIの実際のID
+    }
+  }
+  
+  return null;
+}
+
+// APIで会議を終了する関数
+async function endMeetingViaAPI() {
+  try {
+    // 現在進行中の会議のIDを取得
+    const meetingId = getCurrentMeetingId();
+    
+    if (!meetingId) {
+      throw new Error('現在進行中の会議が見つかりません');
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/rooms/${currentRoomId}/meetings`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ meetingId: meetingId })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const endedMeeting = await response.json();
+    console.log('会議が終了されました:', endedMeeting);
+    
+    // 会議終了後、データを再取得して表示を更新
+    await updateRoomDataFromAPI(currentRoomId);
+    updateStatusDisplay();
+    updateMeetingsList();
+    
+    // 成功通知を表示
+    showNotification('会議終了しました');
+    
+  } catch (error) {
+    console.error('会議終了に失敗:', error);
+    
+    // エラー通知を表示
+    showNotification('会議終了に失敗しました', true);
+  }
+}
+
+// 長押しタイマー関連の変数
+let longPressTimer = null;
+let isLongPressing = false;
+
+// 長押し開始
+function startLongPress() {
+  if (roomStatus !== 'occupied') return;
+  
+  isLongPressing = true;
+  const indicator = document.getElementById("statusIndicator");
+  indicator.classList.add("pressing");
+  
+  // プログレスバーを追加
+  const progressBar = document.createElement("div");
+  progressBar.className = "long-press-progress";
+  indicator.appendChild(progressBar);
+  
+  // 長押し時間後に会議終了
+  longPressTimer = setTimeout(() => {
+    endMeetingViaAPI();
+    endLongPress();
+  }, LONG_PRESS_DURATION);
+}
+
+// 長押し終了
+function endLongPress() {
+  if (!isLongPressing) return;
+  
+  isLongPressing = false;
+  const indicator = document.getElementById("statusIndicator");
+  indicator.classList.remove("pressing");
+  
+  // プログレスバーを削除
+  const progressBar = indicator.querySelector(".long-press-progress");
+  if (progressBar) {
+    progressBar.remove();
+  }
+  
+  if (longPressTimer) {
+    clearTimeout(longPressTimer);
+    longPressTimer = null;
+  }
+  
+  // 長押し終了後、状態表示を更新
+  updateStatusDisplay();
+}
+
+// 長押しイベントリスナーを設定
+function setupLongPressEvents() {
+  const indicator = document.getElementById("statusIndicator");
+  
+  // マウスイベント
+  indicator.addEventListener('mousedown', startLongPress);
+  indicator.addEventListener('mouseup', endLongPress);
+  indicator.addEventListener('mouseleave', endLongPress);
+  
+  // タッチイベント
+  indicator.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    startLongPress();
+  });
+  indicator.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    endLongPress();
+  });
+  indicator.addEventListener('touchcancel', (e) => {
+    e.preventDefault();
+    endLongPress();
+  });
+}
+
 // 会議一覧を更新
 function updateMeetingsList() {
   const container = document.getElementById("meetingsList")
@@ -355,6 +526,7 @@ async function init() {
   updateStatusDisplay() // 会議室データに基づいてステータスを判定
   updateBookingButtons()
   updateMeetingsList()
+  setupLongPressEvents() // 長押しイベントを設定
 
   // 1秒ごとに時刻と表示を更新
   setInterval(() => {
