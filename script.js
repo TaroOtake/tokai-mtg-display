@@ -28,6 +28,7 @@ let currentRoomId = "roomA" // デフォルトの会議室ID
 let currentRoomData = { name: "会議室A", meetings: [] }
 let currentTime = new Date()
 let roomStatus = "available" // 'available' or 'occupied'
+let isBookingInProgress = false // 予約処理中フラグ
 
 // 長押し設定
 const LONG_PRESS_DURATION = 1000 // 長押し時間（ミリ秒）
@@ -36,6 +37,7 @@ const LONG_PRESS_DURATION = 1000 // 長押し時間（ミリ秒）
 document.documentElement.style.setProperty('--long-press-duration', `${LONG_PRESS_DURATION}ms`);
 
 // API設定
+//const API_BASE_URL = 'http://localhost:8787' // ローカル開発環境のURL
 const API_BASE_URL = 'https://room-status-api.taro-otake.workers.dev' // Cloudflare Workersの本番URL
 
 // APIから会議データを取得
@@ -238,7 +240,8 @@ function updateBookingButtons() {
 
   timeSlots.forEach((slot) => {
     const button = document.createElement("button")
-    button.className = "booking-btn"
+    button.className = isBookingInProgress ? "booking-btn disabled" : "booking-btn"
+    button.disabled = isBookingInProgress
     button.innerHTML = `
             <span class="booking-time">~${slot.endTime}</span>
             <span class="booking-duration">(${slot.duration}分)</span>
@@ -279,6 +282,9 @@ function createMeetingData(endTimeString) {
 // APIに予約を作成する関数
 async function createMeetingViaAPI(meetingData) {
   try {
+    // 予約処理開始フラグを設定
+    isBookingInProgress = true;
+    
     const response = await fetch(`${API_BASE_URL}/api/rooms/${currentRoomId}/meetings`, {
       method: 'POST',
       headers: {
@@ -287,12 +293,13 @@ async function createMeetingViaAPI(meetingData) {
       body: JSON.stringify(meetingData)
     });
 
-
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const createdMeeting = await response.json();
+    console.log('予約が作成されました:', createdMeeting);
+    
     // 予約作成後、データを再取得して表示を更新
     await updateRoomDataFromAPI(currentRoomId);
     updateStatusDisplay();
@@ -301,11 +308,19 @@ async function createMeetingViaAPI(meetingData) {
   } catch (error) {
     console.error('予約作成に失敗:', error);
     alert('予約の作成に失敗しました。もう一度お試しください。');
+  } finally {
+    // 予約処理終了フラグをリセット
+    isBookingInProgress = false;
   }
 }
 
 // インスタント予約処理
 async function handleInstantBooking(endTimeString) {
+  // 既に処理中の場合は何もしない
+  if (isBookingInProgress) {
+    return;
+  }
+  
   const newMeeting = createMeetingData(endTimeString);
   await createMeetingViaAPI(newMeeting);
 }
