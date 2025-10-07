@@ -30,6 +30,14 @@
             </div>
         </div>
 
+        <!-- APIリクエスト中のモーダル -->
+        <div class="api-request-modal" id="apiRequestModal">
+            <div class="modal-content">
+                <div class="modal-spinner"></div>
+                <div class="modal-text">APIリクエスト中...</div>
+            </div>
+        </div>
+
         <!-- インスタント予約 -->
         <div class="instant-booking" id="instantBooking">
             <div class="card">
@@ -68,6 +76,13 @@
         </footer>
     </div>
 
-    <script src="script.js"></script>
+    <!-- JavaScript files (loaded in dependency order) -->
+    <script src="config.js"></script>
+    <script src="utils.js"></script>
+    <script src="api.js"></script>
+    <script src="meeting.js"></script>
+    <script src="ui.js"></script>
+    <script src="events.js"></script>
+    <script src="main.js"></script>
 </body>
 </html>
