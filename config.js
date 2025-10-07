@@ -27,8 +27,8 @@ const allRoomData = {
 const LONG_PRESS_DURATION = 1000 // 長押し時間（ミリ秒）
 
 // API設定
-const API_BASE_URL = 'http://localhost:8787' // ローカル開発環境のURL
-//const API_BASE_URL = 'https://room-status-api.taro-otake.workers.dev' // Cloudflare Workersの本番URL
+//const API_BASE_URL = 'http://localhost:8787' // ローカル開発環境のURL
+const API_BASE_URL = 'https://room-status-api.taro-otake.workers.dev' // Cloudflare Workersの本番URL
 
 // グローバル変数
 let currentRoomId = "roomA" // デフォルトの会議室ID
