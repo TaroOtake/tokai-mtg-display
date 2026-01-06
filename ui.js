@@ -87,7 +87,7 @@ function updateMeetingsList() {
 
   currentRoomData.meetings.forEach((meeting) => {
     const meetingDiv = document.createElement("div")
-    meetingDiv.className = `meeting-item ${meeting.isActive ? "active" : ""}`
+    meetingDiv.className = `meeting-item ${meeting.isActive ? "active" : ""} ${meeting.isPrivate ? "private" : ""}`
 
     meetingDiv.innerHTML = `
             <div class="meeting-header">
@@ -98,6 +98,7 @@ function updateMeetingsList() {
                 <div class="meeting-time">
                     🕐 ${meeting.startTime} - ${meeting.endTime}
                 </div>
+                ${meeting.organizer ? `<div class="meeting-organizer">👤 ${meeting.organizer}</div>` : ""}
             </div>
         `
 

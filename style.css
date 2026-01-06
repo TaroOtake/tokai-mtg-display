@@ -265,6 +265,15 @@ body {
   background-color: #fef2f2;
 }
 
+.meeting-item.private {
+  opacity: 0.7;
+}
+
+.meeting-item.private .meeting-title {
+  color: #6b7280;
+  font-style: italic;
+}
+
 .meeting-header {
   display: flex;
   justify-content: space-between; /* Changed from 'between' to 'space-between' */
